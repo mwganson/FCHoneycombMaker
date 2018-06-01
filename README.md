@@ -41,3 +41,13 @@ The final step in the process is to fuse the arrays together, and then cut them 
 If you want to create a border (or have margins) you can resize the plate independtly of the honeycomb by adjusting its properties 
 in the data tab in the combo view.  To do this you'll need to click the round expression engine icon, and then choose discard, just 
 bear in mind this will break the links to the spreadsheet.
+
+<img src="honeycombmaker-screenshot3.png" alt="screenshot3">
+
+In the above image I have hidden the initial rectangular plate and added 3 cylinders because I want to show how you can use this to make a circular grid, too.  I could have deleted the plate object, too.
+
+<img src="honeycombmaker-screenshot4.png" alt="screenshot4">
+
+In the above image the 2 arrays were fused together, and then cut out of the first cylinder.  Additionally, I have cut the smaller cylinder out of the larger cylinder to create a border ring, which I have then positioned into place and is ready to be fused with the other cut.
+
+<img src="honeycombmaker-screenshot5.png" alt="screenshot5">
