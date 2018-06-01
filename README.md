@@ -51,3 +51,11 @@ In the above image I have hidden the initial rectangular plate and added 3 cylin
 In the above image the 2 arrays were fused together, and then cut out of the first cylinder.  Additionally, I have cut the smaller cylinder out of the larger cylinder to create a border ring, which I have then positioned into place and is ready to be fused with the other cut.
 
 <img src="honeycombmaker-screenshot5.png" alt="screenshot5">
+
+I decided my screen wasn't thick enough, so I edited the EditMe spreadsheet:
+
+<img src="honeycombmaker-screenshot6.png" alt="screenshot6">
+
+and it automatically updated the final object:
+
+<img src="honeycombmaker-screenshot7.png" alt="screenshot7">
