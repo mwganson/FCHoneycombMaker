@@ -59,3 +59,13 @@ I decided my screen wasn't thick enough, so I edited the EditMe spreadsheet:
 and it automatically updated the final object:
 
 <img src="honeycombmaker-screenshot7.png" alt="screenshot7">
+
+If you'd prefer a different shape as the base you could easily swap out the extruded hexagon with a sphere or, as I did in the image below, an ellipsoid shaped somewhat like an egg.  Could be used to create egg crate designs.
+
+<img src="honeycombmaker-screenshot8.png" alt="screenshot8">
+
+All you need to do to make that change is to change the Base property in the 2 arrays from extruded hexagon to the new object.  The hexagon is linked (its radius) to the spreadsheet, and the extruded hexagon is also linked (its length forward), so you might want to hook those links with the new object if you want its relevant properties updated when you change values in the spreadsheet.  Just click the expression engine icon in the property (combo view, data tab) and enter EditMe.height, EditMe.radius, or whichever value you want to link with for that property of that object.
+
+Because we use draft array objects for the arrays, these can also be easily extended into the z direction if you want to, for example, to create a hollowed out interior.  Just set the ZNumber property in both arrays to the desired number.  You can also link the ZInterval to the spreadsheet using EditMe.xInterval or EditMe.yInterval or something like EditMe.height+EditMe.separation.
+
+<img src="honeycombmaker-screenshot9.png" alt="screenshot9">
