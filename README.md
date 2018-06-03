@@ -69,3 +69,10 @@ All you need to do to make that change is to change the Base property in the 2 a
 Because we use draft array objects for the arrays, these can also be easily extended into the z direction if you want to, for example, to create a hollowed out interior.  Just set the ZNumber property in both arrays to the desired number.  You can also link the ZInterval to the spreadsheet using EditMe.xInterval or EditMe.yInterval or something like EditMe.height+EditMe.separation.
 
 <img src="honeycombmaker-screenshot9.png" alt="screenshot9">
+
+For more z direction modifications, look at how I set the placement offset for array2 relative to array1, and perhaps employ something similar for the z direction offsets:
+
+<img src="honeycombmaker-screenshot10.png" alt="screenshot10">
+
+
+<img src="honeycombmaker-screenshot10.png" alt="screenshot10">
