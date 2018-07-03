@@ -48,7 +48,7 @@ __title__ = "FCHoneycombMaker"
 __author__ = "TheMarkster"
 __url__ = "https://github.com/mwganson/FCHoneycombMaker"
 __Wiki__ = "https://github.com/mwganson/FCHoneycombMaker/blob/master/README.md"
-__date__ = "2018.07.02" #year.month.date
+__date__ = "2018.07.03" #year.month.date
 __version__ = __date__
 
 
@@ -67,7 +67,7 @@ PLATE_WIDTH = 20
 PLATE_LENGTH = 55
 PLATE_HEIGHT = 5
 
-
+DraftTools.msg('\nFCHoneycombMaker v'+__version__+'\n')
 
 
 def makeHexagonSketch(sketchName):
@@ -400,6 +400,17 @@ if ok:
         f.BaseFeature.ViewObject.hide()
         Gui.Selection.addSelection(f)
 
+
+        App.getDocument(docName).plate_body.setExpression('Placement.Base.x', u'EditMe.tweakX')
+        App.getDocument(docName).plate_body.setExpression('Placement.Base.y', u'EditMe.tweakY')
+        App.getDocument(docName).plate_body.setExpression('Placement.Base.z', u'EditMe.tweakZ')
+        App.getDocument(docName).pd_row1_array.setExpression('Placement.Base.x', u'EditMe.tweakX')
+        App.getDocument(docName).pd_row1_array.setExpression('Placement.Base.y', u'EditMe.tweakY')
+        App.getDocument(docName).pd_row1_array.setExpression('Placement.Base.z', u'EditMe.tweakZ')
+        App.getDocument(docName).pd_row2_array.setExpression('Placement.Base.x', u'EditMe.array2XPos + EditMe.tweakX')
+        App.getDocument(docName).pd_row2_array.setExpression('Placement.Base.y', u'EditMe.array2YPos + EditMe.tweakY')
+        App.getDocument(docName).pd_row2_array.setExpression('Placement.Base.z', u'EditMe.tweakZ')
+
         #uncomment these if you just want to make the part/draft objects invisible
         #Gui.getDocument(docName).getObject('Plate').Visibility=False
         #Gui.getDocument(docName).getObject("HoneyCombRow2Array").Visibility=False
@@ -409,6 +420,8 @@ if ok:
         App.ActiveDocument.removeObject('Plate')
         App.ActiveDocument.removeObject("HoneyCombRow2Array")
         App.ActiveDocument.removeObject("HoneyCombRow1Array")
+        App.ActiveDocument.removeObject("ExtrudedHexagon")
+        App.ActiveDocument.removeObject("Hexagon")
 
 
 App.ActiveDocument.recompute()
