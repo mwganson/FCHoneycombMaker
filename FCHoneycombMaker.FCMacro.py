@@ -48,7 +48,7 @@ __title__ = "FCHoneycombMaker"
 __author__ = "TheMarkster"
 __url__ = "https://github.com/mwganson/FCHoneycombMaker"
 __Wiki__ = "https://github.com/mwganson/FCHoneycombMaker/blob/master/README.md"
-__date__ = "2018.06.01" #year.month.date
+__date__ = "2018.07.02" #year.month.date
 __version__ = __date__
 
 
@@ -58,12 +58,54 @@ import FreeCAD
 import math
 import Part,Draft
 from PySide import QtCore, QtGui
+import ProfileLib.RegularPolygon
+import Sketcher
 
 RADIUS = 2
 SEPARATION = .25 
 PLATE_WIDTH = 20
 PLATE_LENGTH = 55
 PLATE_HEIGHT = 5
+
+
+
+
+def makeHexagonSketch(sketchName):
+    #would use the polygon tool, but is buggy and sometimes creates squares instead of hexagons, so the manual way
+    sketch = App.ActiveDocument.getObject(sketchName)
+#we just place the vertices any old where and then constrain them into place later
+    sketch.addGeometry(Part.LineSegment(App.Vector(-2.000000,1.448548,0),App.Vector(0.500515,2.469759,0)),False)
+    sketch.addGeometry(Part.LineSegment(App.Vector(0.500515,2.469759,0),App.Vector(2.000000,1.696951,0)),False)
+    sketch.addConstraint(Sketcher.Constraint('Coincident',0,2,1,1)) 
+    sketch.addGeometry(Part.LineSegment(App.Vector(2.000000,1.696951,0),App.Vector(2.736140,-0.676675,0)),False)
+    sketch.addConstraint(Sketcher.Constraint('Coincident',1,2,2,1)) 
+    sketch.addGeometry(Part.LineSegment(App.Vector(2.736140,-0.676675,0),App.Vector(1.000000,-2.415493,0)),False)
+    sketch.addConstraint(Sketcher.Constraint('Coincident',2,2,3,1)) 
+    sketch.addGeometry(Part.LineSegment(App.Vector(1.000000,-2.415493,0),App.Vector(-3.000000,-1.000000,0)),False)
+    sketch.addConstraint(Sketcher.Constraint('Coincident',3,2,4,1)) 
+    sketch.addGeometry(Part.LineSegment(App.Vector(-3.000000,-1.000000,0),App.Vector(-2.000000,1.365748,0)),False)
+    sketch.addConstraint(Sketcher.Constraint('Coincident',4,2,5,1)) 
+    sketch.addConstraint(Sketcher.Constraint('Coincident',5,2,0,1)) 
+    sketch.addGeometry(Part.Circle(App.Vector(0.000000,0.000000,0),App.Vector(0,0,1),3.535498),False) #construction circle
+    sketch.addConstraint(Sketcher.Constraint('Coincident',6,3,-1,1)) 
+    sketch.addConstraint(Sketcher.Constraint('Radius',6,3.535498)) 
+    sketch.setDatum(7,App.Units.Quantity('2.000000 mm'))
+    sketch.addConstraint(Sketcher.Constraint('PointOnObject',4,2,6)) #constrain all vertices to the circumference
+    sketch.addConstraint(Sketcher.Constraint('PointOnObject',0,1,6)) 
+    sketch.addConstraint(Sketcher.Constraint('PointOnObject',0,2,6)) 
+    sketch.addConstraint(Sketcher.Constraint('PointOnObject',1,2,6)) 
+    sketch.addConstraint(Sketcher.Constraint('PointOnObject',2,2,6)) 
+    sketch.addConstraint(Sketcher.Constraint('PointOnObject',3,2,6)) 
+    sketch.toggleConstruction(6) 
+    sketch.addConstraint(Sketcher.Constraint('Equal',5,0)) #set all lines equal
+    sketch.addConstraint(Sketcher.Constraint('Equal',0,1)) 
+    sketch.addConstraint(Sketcher.Constraint('Equal',1,2)) 
+    sketch.addConstraint(Sketcher.Constraint('Equal',2,3)) 
+    sketch.addConstraint(Sketcher.Constraint('Equal',3,4)) 
+    sketch.addConstraint(Sketcher.Constraint('Horizontal',0)) #make one of them horizontal
+    sketch.setExpression('Constraints[7]', u'EditMe.radius')
+
+
 
 
 
@@ -101,7 +143,7 @@ and countX and countY variables to arrange the hexagon arrays to your liking.
 
 The final step in the process is to fuse the arrays together, and then cut them out of the plate.
 
-If you want to create a border (or have margins) you can resize the plate independtly of the honeycomb by adjusting its properties 
+If you want to create a border (or have margins) you can resize the plate independently of the honeycomb by adjusting its properties 
 in the data tab in the combo view.  To do this you'll need to click the round expression engine icon, and then choose discard, just 
 bear in mind this will break the links to the spreadsheet.
 """
@@ -109,7 +151,7 @@ set('A13', msg1)
 
 
 aliases={'radius':'B2', 'separation':'B3', 'width':'B4', 'length':'B5', 'height':'B6', 'tweakX':'B8','tweakY':'B9','tweakZ':'B10',
-'xInterval':'E2', 'yInterval':'E3', 'firstX':'E4', 'firstY':'E5','countX':'E6', 'countY':'E7'
+'xInterval':'E2', 'yInterval':'E3', 'firstX':'E4', 'firstY':'E5','countX':'E6', 'countY':'E7','array2XPos':'E8','array2YPos':'E9',
 
  }
 
@@ -152,7 +194,10 @@ set('D6', 'Count X:')
 set(aliases['countX'], '=round((B5) / E2)')
 set('D7', 'Count Y:')
 set(aliases['countY'], '=round((B4) / E3)')
-
+set ('D8', 'Array2 XPos:')
+set (aliases['array2XPos'], '=sin(60deg)*(B2*2+B3-0.26794899999999999*B2)')
+set ('D9', 'Array2 YPos:')
+set (aliases['array2YPos'],'=E3/2')
 
 #plate = Part.makeBox(PLATE_WIDTH,PLATE_LENGTH,PLATE_HEIGHT)
 #plate = Part.makeBox(worksheet.B4, worksheet.B5, worksheet.B6)
@@ -196,9 +241,10 @@ yvector = App.Vector(0, yInterval,0)
 row1Array = Draft.makeArray(extrudedHexagonObject, xvector,yvector,countX,countY,"HoneyCombRow1Array")
 row2Array = Draft.makeArray(extrudedHexagonObject, xvector,yvector,countX,countY,"HoneyCombRow2Array")
 row2Array.Placement = App.Placement(App.Vector(math.sin(60*math.pi/180.0)*(RADIUS*2+(SEPARATION-0.267949)),yInterval,0),App.Rotation(0,0,0),App.Vector(0,0,0))
-row2Array.setExpression('Placement.Base.x','sin(60deg) * (EditMe.radius * 2 + (EditMe.separation-0.267949*EditMe.radius))')
-
-row2Array.setExpression('Placement.Base.y','EditMe.yInterval/2.0')
+#row2Array.setExpression('Placement.Base.x','sin(60deg) * (EditMe.radius * 2 + (EditMe.separation-0.267949*EditMe.radius))')
+row2Array.setExpression('Placement.Base.x','EditMe.array2XPos')
+#row2Array.setExpression('Placement.Base.y','EditMe.yInterval/2.0')
+row2Array.setExpression('Placement.Base.y','EditMe.array2YPos')
 row1Array.setExpression('IntervalX.x','EditMe.xInterval')
 row1Array.setExpression('IntervalY.y','EditMe.yInterval')
 row1Array.setExpression('NumberX','EditMe.countX')
@@ -209,4 +255,152 @@ row2Array.setExpression('IntervalY.y','EditMe.yInterval')
 row2Array.setExpression('NumberX','EditMe.countX')
 row2Array.setExpression('NumberY','EditMe.countY')
 
+#part design stuff
+window = QtGui.QApplication.activeWindow()
+items=('Add Part Design Compatibility (requires Lattice2 workbench)','Skip Part Design Compatibility')
+item,ok = QtGui.QInputDialog.getItem(window, "Part Design Compatibility", "Make this Part Design compatible?\nRequires DeepSOIC's Lattice2 workbench.\nTools -> Addon Manager -> lattice2 -> Install/Update.", items, 0, False)
+if ok:
+    if item == items[0]:
+        docName = App.activeDocument().Label
+        import lattice2LinearArray
+        import lattice2Executer
+        import lattice2PDPattern
+
+        Gui.getDocument(docName).getObject("HoneyCombRow2Array").Visibility=False
+        Gui.getDocument(docName).getObject("HoneyCombRow1Array").Visibility=False
+        Gui.getDocument(docName).getObject("Plate").Visibility=False
+
+        App.activeDocument().addObject('PartDesign::Body','plate_body')
+        Gui.activeView().setActiveObject('pdbody',App.activeDocument().plate_body)
+        App.ActiveDocument.addObject('PartDesign::AdditiveBox','Box')
+        App.ActiveDocument.plate_body.addObject(App.activeDocument().Box)
+        App.getDocument(docName).Box.setExpression('Length', u'EditMe.length')
+        App.getDocument(docName).Box.setExpression('Width', u'EditMe.width')
+        App.getDocument(docName).Box.setExpression('Height', u'EditMe.height')
+
+        App.activeDocument().addObject('PartDesign::Body','pd_row1_array')
+        App.activeDocument().addObject('PartDesign::Body','pd_row2_array')
+
+        Gui.activeView().setActiveObject('pdbody',App.activeDocument().pd_row1_array)
+        App.activeDocument().pd_row1_array.newObject('Sketcher::SketchObject','hexagon_sketch')
+        App.activeDocument().hexagon_sketch.Support = (App.activeDocument().XY_Plane001, [''])
+        App.activeDocument().hexagon_sketch.MapMode = 'FlatFace'
+        makeHexagonSketch('hexagon_sketch')
+       
+        App.activeDocument().pd_row1_array.newObject("PartDesign::Pad","hex_pad")
+        App.activeDocument().hex_pad.Profile = App.activeDocument().hexagon_sketch
+        App.getDocument(docName).hex_pad.setExpression('Length', u'EditMe.height')
+
+        Gui.activeView().setActiveObject('pdbody',App.activeDocument().pd_row2_array)
+        App.activeDocument().pd_row2_array.newObject('Sketcher::SketchObject','hexagon_sketch2')
+        App.activeDocument().hexagon_sketch.Support = (App.activeDocument().XY_Plane001, [''])
+        App.activeDocument().hexagon_sketch.MapMode = 'FlatFace'
+        makeHexagonSketch('hexagon_sketch2')
+
+
+        App.activeDocument().pd_row2_array.newObject("PartDesign::Pad","hex_pad2")
+        App.activeDocument().hex_pad2.Profile = App.activeDocument().hexagon_sketch2
+        App.getDocument(docName).hex_pad2.setExpression('Length', u'EditMe.height')
+        App.ActiveDocument.recompute()
+
+        FreeCAD.getDocument(docName).getObject("pd_row2_array").Placement = App.Placement(App.Vector(3.22,0,0),App.Rotation(App.Vector(0,0,1),0))
+        App.getDocument(docName).pd_row2_array.setExpression('Placement.Base.x', u'EditMe.array2XPos')
+        FreeCAD.getDocument(docName).getObject("pd_row2_array").Placement = App.Placement(App.Vector(3.22,0,0),App.Rotation(App.Vector(0,0,1),0))
+        FreeCAD.getDocument(docName).getObject("pd_row2_array").Placement = App.Placement(App.Vector(3.21651,1.86,0),App.Rotation(App.Vector(0,0,1),0))
+        App.getDocument(docName).pd_row2_array.setExpression('Placement.Base.y', u'EditMe.array2YPos')
+
+        Gui.getDocument(docName).getObject("hexagon_sketch2").Visibility=False
+        Gui.getDocument(docName).getObject("hexagon_sketch").Visibility=False
+        Gui.activeView().setActiveObject('pdbody',App.activeDocument().pd_row2_array)
+        f = lattice2LinearArray.makeLinearArray(name='LinearArray')
+        f.Link = App.ActiveDocument.Box
+        f.LinkSubelement = 'Edge9'
+        f.GeneratorMode = 'StepN'
+        lattice2Executer.executeFeature(f)
+        Gui.Selection.clearSelection()
+        Gui.Selection.addSelection(f)
+        App.getDocument(docName).LinearArray.setExpression('Count', u'EditMe.countX+1')
+        App.getDocument(docName).LinearArray.setExpression('Step', u'EditMe.xInterval')
+        App.activeDocument().recompute()
+        f = lattice2PDPattern.makeFeature()
+        f.FeaturesToCopy = [App.ActiveDocument.hex_pad2]
+        f.PlacementsTo = App.ActiveDocument.LinearArray
+        f.Referencing = 'First item'
+        lattice2Executer.executeFeature(f)
+        f.PlacementsTo.ViewObject.hide()
+        f.BaseFeature.ViewObject.hide()
+        Gui.Selection.addSelection(f)
+
+        Gui.getDocument(docName).ActiveView.setActiveObject('pdbody', App.getDocument(docName).getObject('pd_row1_array'))
+        Gui.activateWorkbench("Lattice2Workbench")
+        import PartDesignGui
+        f = lattice2LinearArray.makeLinearArray(name='LinearArray')
+        f.Link = App.ActiveDocument.Box
+        f.LinkSubelement = 'Edge9'
+        f.GeneratorMode = 'StepN'
+        lattice2Executer.executeFeature(f)
+        Gui.Selection.clearSelection()
+        Gui.Selection.addSelection(f)
+        App.getDocument(docName).LinearArray001.setExpression('Step', u'EditMe.xInterval')
+        App.getDocument(docName).LinearArray001.setExpression('Count', u'EditMe.countX+1')
+        App.activeDocument().recompute()
+        f = lattice2PDPattern.makeFeature()
+        f.FeaturesToCopy = [App.ActiveDocument.hex_pad]
+        f.PlacementsTo = App.ActiveDocument.LinearArray001
+        f.Referencing = 'First item'
+        lattice2Executer.executeFeature(f)
+        f.PlacementsTo.ViewObject.hide()
+        f.BaseFeature.ViewObject.hide()
+        Gui.Selection.addSelection(f)
+        f = None
+
+        f = lattice2LinearArray.makeLinearArray(name='LinearArray')
+        f.Link = App.ActiveDocument.Box
+        f.LinkSubelement = 'Edge2'
+        f.GeneratorMode = 'StepN'
+        lattice2Executer.executeFeature(f)
+        Gui.Selection.clearSelection()
+        Gui.Selection.addSelection(f)
+        App.getDocument(docName).LinearArray002.setExpression('Count', u'EditMe.countY+1')
+        App.getDocument(docName).LinearArray002.setExpression('Step', u'EditMe.yInterval')
+        App.activeDocument().recompute()
+        f = lattice2PDPattern.makeFeature()
+        f.FeaturesToCopy = [App.ActiveDocument.LatticePattern001]
+        f.PlacementsTo = App.ActiveDocument.LinearArray002
+        f.Referencing = 'First item'
+        lattice2Executer.executeFeature(f)
+        f.PlacementsTo.ViewObject.hide()
+        f.BaseFeature.ViewObject.hide()
+        Gui.Selection.addSelection(f)
+        f = None
+        Gui.activateWorkbench('PartDesignWorkbench')
+        Gui.getDocument(docName).ActiveView.setActiveObject('pdbody', App.getDocument(docName).getObject('pd_row2_array'))
+        Gui.activateWorkbench("Lattice2Workbench")
+        import PartDesignGui
+        f = lattice2LinearArray.makeLinearArray(name='LinearArray')
+        f.Link = App.ActiveDocument.Box
+        f.LinkSubelement = 'Edge2'
+        f.GeneratorMode = 'StepN'
+        lattice2Executer.executeFeature(f)
+        Gui.Selection.clearSelection()
+        Gui.Selection.addSelection(f)
+        App.getDocument(docName).LinearArray003.setExpression('Step', u'EditMe.yInterval')
+        App.getDocument(docName).LinearArray003.setExpression('Count', u'EditMe.countY+1')
+        App.activeDocument().recompute()
+        f = lattice2PDPattern.makeFeature()
+        f.FeaturesToCopy = [App.ActiveDocument.LatticePattern]
+        f.PlacementsTo = App.ActiveDocument.LinearArray003
+        f.Referencing = 'First item'
+        lattice2Executer.executeFeature(f)
+        f.PlacementsTo.ViewObject.hide()
+        f.BaseFeature.ViewObject.hide()
+        Gui.Selection.addSelection(f)
+
+        #Gui.getDocument(docName).getObject('Plate').Visibility=False
+        #Gui.getDocument(docName).getObject("HoneyCombRow2Array").Visibility=False
+        #Gui.getDocument(docName).getObject("HoneyCombRow1Array").Visibility=False
+
+
 App.ActiveDocument.recompute()
+
+
