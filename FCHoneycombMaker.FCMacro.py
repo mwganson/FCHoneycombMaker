@@ -56,7 +56,7 @@ __version__ = __date__
 
 import FreeCAD
 import math
-import Part,Draft
+import Part,Draft,DraftTools
 from PySide import QtCore, QtGui
 import ProfileLib.RegularPolygon
 import Sketcher
@@ -262,13 +262,17 @@ item,ok = QtGui.QInputDialog.getItem(window, "Part Design Compatibility", "Make 
 if ok:
     if item == items[0]:
         docName = App.activeDocument().Label
-        import lattice2LinearArray
-        import lattice2Executer
-        import lattice2PDPattern
-
-        Gui.getDocument(docName).getObject("HoneyCombRow2Array").Visibility=False
-        Gui.getDocument(docName).getObject("HoneyCombRow1Array").Visibility=False
-        Gui.getDocument(docName).getObject("Plate").Visibility=False
+        try:
+            import lattice2LinearArray
+            import lattice2Executer
+            import lattice2PDPattern
+        except:
+            msg = QtGui.QMessageBox()
+            msg.setWindowTitle('Message from Management')
+            msg.setText('You need to install Lattice2 workbench.  Exiting ungracefully...')
+            msg.exec_()
+            App.ActiveDocument.recompute()
+            raise StandardError('Lattice2 not found.')
 
         App.activeDocument().addObject('PartDesign::Body','plate_body')
         Gui.activeView().setActiveObject('pdbody',App.activeDocument().plate_body)
@@ -396,9 +400,15 @@ if ok:
         f.BaseFeature.ViewObject.hide()
         Gui.Selection.addSelection(f)
 
+        #uncomment these if you just want to make the part/draft objects invisible
         #Gui.getDocument(docName).getObject('Plate').Visibility=False
         #Gui.getDocument(docName).getObject("HoneyCombRow2Array").Visibility=False
         #Gui.getDocument(docName).getObject("HoneyCombRow1Array").Visibility=False
+
+        #and comment these to keep them from getting removed
+        App.ActiveDocument.removeObject('Plate')
+        App.ActiveDocument.removeObject("HoneyCombRow2Array")
+        App.ActiveDocument.removeObject("HoneyCombRow1Array")
 
 
 App.ActiveDocument.recompute()
