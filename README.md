@@ -1,4 +1,7 @@
 # FCHoneycombMaker
+
+#New Feature: now Part Design compatible. (Requires installation of DeepSOIC's Lattice2 workbench.)
+
 Aids in laying out rectangular array of hexagons to form a honeycomb grid.
 
 When you execute the macro it creates a spreadsheet called "EditMe", a 6-sized regular polygon, which gets extruded into a prism, 2 rectangular areas of said hexagons, and a "plate", which is just a resized cube.
