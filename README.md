@@ -1,6 +1,7 @@
 # FCHoneycombMaker
 
 #New Feature: now Part Design compatible. (Requires installation of DeepSOIC's Lattice2 workbench.)
+<img src="honeycombmaker-pd-optimized.gif" alt="animated gif intro to part design compatibility">
 
 Aids in laying out rectangular array of hexagons to form a honeycomb grid.
 
