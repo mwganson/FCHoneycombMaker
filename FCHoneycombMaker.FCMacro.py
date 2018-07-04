@@ -48,7 +48,7 @@ __title__ = "FCHoneycombMaker"
 __author__ = "TheMarkster"
 __url__ = "https://github.com/mwganson/FCHoneycombMaker"
 __Wiki__ = "https://github.com/mwganson/FCHoneycombMaker/blob/master/README.md"
-__date__ = "2018.07.03" #year.month.date
+__date__ = "2018.07.04" #year.month.date
 __version__ = __date__
 
 
@@ -278,9 +278,9 @@ if ok:
         Gui.activeView().setActiveObject('pdbody',App.activeDocument().plate_body)
         App.ActiveDocument.addObject('PartDesign::AdditiveBox','Box')
         App.ActiveDocument.plate_body.addObject(App.activeDocument().Box)
-        App.getDocument(docName).Box.setExpression('Length', u'EditMe.length')
-        App.getDocument(docName).Box.setExpression('Width', u'EditMe.width')
-        App.getDocument(docName).Box.setExpression('Height', u'EditMe.height')
+        App.ActiveDocument.Box.setExpression('Length', u'EditMe.length')
+        App.ActiveDocument.Box.setExpression('Width', u'EditMe.width')
+        App.ActiveDocument.Box.setExpression('Height', u'EditMe.height')
 
         App.activeDocument().addObject('PartDesign::Body','pd_row1_array')
         App.activeDocument().addObject('PartDesign::Body','pd_row2_array')
@@ -293,7 +293,7 @@ if ok:
        
         App.activeDocument().pd_row1_array.newObject("PartDesign::Pad","hex_pad")
         App.activeDocument().hex_pad.Profile = App.activeDocument().hexagon_sketch
-        App.getDocument(docName).hex_pad.setExpression('Length', u'EditMe.height')
+        App.ActiveDocument.hex_pad.setExpression('Length', u'EditMe.height')
 
         Gui.activeView().setActiveObject('pdbody',App.activeDocument().pd_row2_array)
         App.activeDocument().pd_row2_array.newObject('Sketcher::SketchObject','hexagon_sketch2')
@@ -304,17 +304,17 @@ if ok:
 
         App.activeDocument().pd_row2_array.newObject("PartDesign::Pad","hex_pad2")
         App.activeDocument().hex_pad2.Profile = App.activeDocument().hexagon_sketch2
-        App.getDocument(docName).hex_pad2.setExpression('Length', u'EditMe.height')
+        App.ActiveDocument.hex_pad2.setExpression('Length', u'EditMe.height')
         App.ActiveDocument.recompute()
 
-        FreeCAD.getDocument(docName).getObject("pd_row2_array").Placement = App.Placement(App.Vector(3.22,0,0),App.Rotation(App.Vector(0,0,1),0))
-        App.getDocument(docName).pd_row2_array.setExpression('Placement.Base.x', u'EditMe.array2XPos')
-        FreeCAD.getDocument(docName).getObject("pd_row2_array").Placement = App.Placement(App.Vector(3.22,0,0),App.Rotation(App.Vector(0,0,1),0))
-        FreeCAD.getDocument(docName).getObject("pd_row2_array").Placement = App.Placement(App.Vector(3.21651,1.86,0),App.Rotation(App.Vector(0,0,1),0))
-        App.getDocument(docName).pd_row2_array.setExpression('Placement.Base.y', u'EditMe.array2YPos')
+        App.ActiveDocument.getObject("pd_row2_array").Placement = App.Placement(App.Vector(3.22,0,0),App.Rotation(App.Vector(0,0,1),0))
+        App.ActiveDocument.pd_row2_array.setExpression('Placement.Base.x', u'EditMe.array2XPos')
+        App.ActiveDocument.getObject("pd_row2_array").Placement = App.Placement(App.Vector(3.22,0,0),App.Rotation(App.Vector(0,0,1),0))
+        App.ActiveDocument.getObject("pd_row2_array").Placement = App.Placement(App.Vector(3.21651,1.86,0),App.Rotation(App.Vector(0,0,1),0))
+        App.ActiveDocument.pd_row2_array.setExpression('Placement.Base.y', u'EditMe.array2YPos')
 
-        Gui.getDocument(docName).getObject("hexagon_sketch2").Visibility=False
-        Gui.getDocument(docName).getObject("hexagon_sketch").Visibility=False
+        Gui.ActiveDocument.getObject("hexagon_sketch2").Visibility=False
+        Gui.ActiveDocument.getObject("hexagon_sketch").Visibility=False
         Gui.activeView().setActiveObject('pdbody',App.activeDocument().pd_row2_array)
         f = lattice2LinearArray.makeLinearArray(name='LinearArray')
         f.Link = App.ActiveDocument.Box
@@ -323,8 +323,8 @@ if ok:
         lattice2Executer.executeFeature(f)
         Gui.Selection.clearSelection()
         Gui.Selection.addSelection(f)
-        App.getDocument(docName).LinearArray.setExpression('Count', u'EditMe.countX+1')
-        App.getDocument(docName).LinearArray.setExpression('Step', u'EditMe.xInterval')
+        App.ActiveDocument.LinearArray.setExpression('Count', u'EditMe.countX+1')
+        App.ActiveDocument.LinearArray.setExpression('Step', u'EditMe.xInterval')
         App.activeDocument().recompute()
         f = lattice2PDPattern.makeFeature()
         f.FeaturesToCopy = [App.ActiveDocument.hex_pad2]
@@ -335,7 +335,7 @@ if ok:
         f.BaseFeature.ViewObject.hide()
         Gui.Selection.addSelection(f)
 
-        Gui.getDocument(docName).ActiveView.setActiveObject('pdbody', App.getDocument(docName).getObject('pd_row1_array'))
+        Gui.ActiveDocument.ActiveView.setActiveObject('pdbody', App.ActiveDocument.getObject('pd_row1_array'))
         Gui.activateWorkbench("Lattice2Workbench")
         import PartDesignGui
         f = lattice2LinearArray.makeLinearArray(name='LinearArray')
@@ -345,8 +345,8 @@ if ok:
         lattice2Executer.executeFeature(f)
         Gui.Selection.clearSelection()
         Gui.Selection.addSelection(f)
-        App.getDocument(docName).LinearArray001.setExpression('Step', u'EditMe.xInterval')
-        App.getDocument(docName).LinearArray001.setExpression('Count', u'EditMe.countX+1')
+        App.ActiveDocument.LinearArray001.setExpression('Step', u'EditMe.xInterval')
+        App.ActiveDocument.LinearArray001.setExpression('Count', u'EditMe.countX+1')
         App.activeDocument().recompute()
         f = lattice2PDPattern.makeFeature()
         f.FeaturesToCopy = [App.ActiveDocument.hex_pad]
@@ -365,8 +365,8 @@ if ok:
         lattice2Executer.executeFeature(f)
         Gui.Selection.clearSelection()
         Gui.Selection.addSelection(f)
-        App.getDocument(docName).LinearArray002.setExpression('Count', u'EditMe.countY+1')
-        App.getDocument(docName).LinearArray002.setExpression('Step', u'EditMe.yInterval')
+        App.ActiveDocument.LinearArray002.setExpression('Count', u'EditMe.countY+1')
+        App.ActiveDocument.LinearArray002.setExpression('Step', u'EditMe.yInterval')
         App.activeDocument().recompute()
         f = lattice2PDPattern.makeFeature()
         f.FeaturesToCopy = [App.ActiveDocument.LatticePattern001]
@@ -378,7 +378,7 @@ if ok:
         Gui.Selection.addSelection(f)
         f = None
         Gui.activateWorkbench('PartDesignWorkbench')
-        Gui.getDocument(docName).ActiveView.setActiveObject('pdbody', App.getDocument(docName).getObject('pd_row2_array'))
+        Gui.ActiveDocument.ActiveView.setActiveObject('pdbody', App.ActiveDocument.getObject('pd_row2_array'))
         Gui.activateWorkbench("Lattice2Workbench")
         import PartDesignGui
         f = lattice2LinearArray.makeLinearArray(name='LinearArray')
@@ -388,8 +388,8 @@ if ok:
         lattice2Executer.executeFeature(f)
         Gui.Selection.clearSelection()
         Gui.Selection.addSelection(f)
-        App.getDocument(docName).LinearArray003.setExpression('Step', u'EditMe.yInterval')
-        App.getDocument(docName).LinearArray003.setExpression('Count', u'EditMe.countY+1')
+        App.ActiveDocument.LinearArray003.setExpression('Step', u'EditMe.yInterval')
+        App.ActiveDocument.LinearArray003.setExpression('Count', u'EditMe.countY+1')
         App.activeDocument().recompute()
         f = lattice2PDPattern.makeFeature()
         f.FeaturesToCopy = [App.ActiveDocument.LatticePattern]
@@ -401,20 +401,20 @@ if ok:
         Gui.Selection.addSelection(f)
 
 
-        App.getDocument(docName).plate_body.setExpression('Placement.Base.x', u'EditMe.tweakX')
-        App.getDocument(docName).plate_body.setExpression('Placement.Base.y', u'EditMe.tweakY')
-        App.getDocument(docName).plate_body.setExpression('Placement.Base.z', u'EditMe.tweakZ')
-        App.getDocument(docName).pd_row1_array.setExpression('Placement.Base.x', u'EditMe.tweakX')
-        App.getDocument(docName).pd_row1_array.setExpression('Placement.Base.y', u'EditMe.tweakY')
-        App.getDocument(docName).pd_row1_array.setExpression('Placement.Base.z', u'EditMe.tweakZ')
-        App.getDocument(docName).pd_row2_array.setExpression('Placement.Base.x', u'EditMe.array2XPos + EditMe.tweakX')
-        App.getDocument(docName).pd_row2_array.setExpression('Placement.Base.y', u'EditMe.array2YPos + EditMe.tweakY')
-        App.getDocument(docName).pd_row2_array.setExpression('Placement.Base.z', u'EditMe.tweakZ')
+        App.ActiveDocument.plate_body.setExpression('Placement.Base.x', u'EditMe.tweakX')
+        App.ActiveDocument.plate_body.setExpression('Placement.Base.y', u'EditMe.tweakY')
+        App.ActiveDocument.plate_body.setExpression('Placement.Base.z', u'EditMe.tweakZ')
+        App.ActiveDocument.pd_row1_array.setExpression('Placement.Base.x', u'EditMe.tweakX')
+        App.ActiveDocument.pd_row1_array.setExpression('Placement.Base.y', u'EditMe.tweakY')
+        App.ActiveDocument.pd_row1_array.setExpression('Placement.Base.z', u'EditMe.tweakZ')
+        App.ActiveDocument.pd_row2_array.setExpression('Placement.Base.x', u'EditMe.array2XPos + EditMe.tweakX')
+        App.ActiveDocument.pd_row2_array.setExpression('Placement.Base.y', u'EditMe.array2YPos + EditMe.tweakY')
+        App.ActiveDocument.pd_row2_array.setExpression('Placement.Base.z', u'EditMe.tweakZ')
 
         #uncomment these if you just want to make the part/draft objects invisible
-        #Gui.getDocument(docName).getObject('Plate').Visibility=False
-        #Gui.getDocument(docName).getObject("HoneyCombRow2Array").Visibility=False
-        #Gui.getDocument(docName).getObject("HoneyCombRow1Array").Visibility=False
+        #App.ActiveDocument.getObject('Plate').Visibility=False
+        #App.ActiveDocument.getObject("HoneyCombRow2Array").Visibility=False
+        #App.ActiveDocument.getObject("HoneyCombRow1Array").Visibility=False
 
         #and comment these to keep them from getting removed
         App.ActiveDocument.removeObject('Plate')
