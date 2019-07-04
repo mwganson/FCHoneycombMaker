@@ -50,27 +50,6 @@ and countX and countY variables to arrange the hexagon arrays to your liking.
 
 The final step in the process is to fuse the arrays together, and then cut them out of the plate.
 
-If you want to create a border (or have margins) you can resize the plate independtly of the honeycomb by adjusting its properties 
-in the data tab in the combo view.  To do this you'll need to click the round expression engine icon, and then choose discard, just 
-bear in mind this will break the links to the spreadsheet.
-
-<img src="honeycombmaker-screenshot3.png" alt="screenshot3">
-
-In the above image I have hidden the initial rectangular plate and added 3 cylinders because I want to show how you can use this to make a circular grid, too.  I could have deleted the plate object, too.
-
-<img src="honeycombmaker-screenshot4.png" alt="screenshot4">
-
-In the above image the 2 arrays were fused together, and then cut out of the first cylinder.  Additionally, I have cut the smaller cylinder out of the larger cylinder to create a border ring, which I have then positioned into place and is ready to be fused with the other cut.
-
-<img src="honeycombmaker-screenshot5.png" alt="screenshot5">
-
-I decided my screen wasn't thick enough, so I edited the EditMe spreadsheet:
-
-<img src="honeycombmaker-screenshot6.png" alt="screenshot6">
-
-and it automatically updated the final object:
-
-<img src="honeycombmaker-screenshot7.png" alt="screenshot7">
 
 If you'd prefer a different shape as the base you could easily swap out the extruded hexagon with a sphere or, as I did in the image below, an ellipsoid shaped somewhat like an egg.  Could be used to create egg crate designs.
 
