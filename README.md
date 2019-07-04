@@ -10,11 +10,12 @@ I've made some major changes.  No longer is any additional workbench required. <
 When you execute the macro it creates a spreadsheet called "EditMe", which is what should be edited if you want to change the parameters of the Honeycomb grid.  An option is presented to the user whether to create a Part Design workbench body or a Part Workbench object.<br/>
 <br/>
 If you choose Part Workbench object you will get an object called "HoneycombGrid", which is a Part::Cut object created by cutting a fusion of 2 arrays of extruded hexagons out of a Part::Cube object.  This object is fully parametric.  Just make your changes in the EditMe spreadsheet.<br/>
+<br/>
 <img src="honeycombmaker-screenshot1.png" alt="screenshot1"><br/>
 <br/>
 If you choose a Part Design body you will get a new Body object called "HoneycombBody".  There will also be a hidden object called "BaseFeatureFace".  Do not delete this object.  It is the object used for the BaseFeature in the new body.  The Pad in the new body is called HoneycombPad.  It is a pad of one of the BaseFeature's faces, rather than the pad of a sketch.  It would not be parametric if I had made a sketch and padded it.  If you would like a sketch you can make one in the Draft workbench.  Select the "BaseFeatureFace" object, then in Draft menu select Draft to Sketch.  The sketch will only be partially constrained and will have a great many degrees of freedom, but should be editable and able to be used in Pad or Pocket operations.<br/>
 <br/>
-
+<img src="honeycombmaker-pd-screenshot.png" alt="pd-screenshot">
 
 Modify the values in the spreadsheet to customize the honeycomb:
 
