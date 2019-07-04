@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 ***************************************************************************
-*   Copyright (c) 2018 <TheMarkster>                                      *
+*   Copyright (c) 2018-2019 <TheMarkster>                                 *
 *                                                                         *
 *   This file is a supplement to the FreeCAD CAx development system.      *
 *                                                                         *
@@ -23,24 +23,12 @@
 ***************************************************************************
 """
 
-#OS: Windows 10
-#Word size of OS: 64-bit
-#Word size of FreeCAD: 64-bit
-#Version: 0.17.13519 (Git)
-#Build type: Release
-#Branch: releases/FreeCAD-0-17
-#Hash: 1a8b868018f45ea486c0023fdbfeb06febc1fb89
-#Python version: 2.7.14
-#Qt version: 4.8.7
-#Coin version: 4.0.0a
-#OCC version: 7.2.0
-#Locale: English/UnitedStates (en_US)
 
 
 """
 FCHoneycombMaker
 
-This is a macro to aid in creation of 2 rectangular arrays of hexagons laid out in a honeycomb pattern.  Parameters,
+This is a macro to aid in creation of a honeycomb grid.  Parameters,
 including hexagon radius, separation between hexagons, etc., can be modified via an included spreadsheet.
 """
 
@@ -48,7 +36,7 @@ __title__ = "FCHoneycombMaker"
 __author__ = "TheMarkster"
 __url__ = "https://github.com/mwganson/FCHoneycombMaker"
 __Wiki__ = "https://github.com/mwganson/FCHoneycombMaker/blob/master/README.md"
-__date__ = "2018.07.04" #year.month.date
+__date__ = "2019.07.04" #year.month.date
 __version__ = __date__
 
 
@@ -67,7 +55,7 @@ PLATE_WIDTH = 20
 PLATE_LENGTH = 55
 PLATE_HEIGHT = 5
 
-DraftTools.msg('\nFCHoneycombMaker v'+__version__+'\n')
+FreeCAD.Console.PrintMessage ('\nFCHoneycombMaker v'+__version__+'\n')
 
 
 def makeHexagonSketch(sketchName):
@@ -111,6 +99,9 @@ def makeHexagonSketch(sketchName):
 
 if not App.ActiveDocument:
     App.newDocument()
+if hasattr(App.ActiveDocument,"EditMe"):
+    raise StandardError("FCHoneycombMaker Error: Please run only once per document.  Create a new document and try again.\n")
+
 worksheet = App.ActiveDocument.addObject("Spreadsheet::Sheet", "EditMe")
 worksheet.setColumnWidth('A',150)
 set = worksheet.set
@@ -191,21 +182,17 @@ set(aliases['firstX'], '=B2')
 set('D5', 'First Y:')
 set(aliases['firstY'], '=B2')
 set('D6', 'Count X:')
-set(aliases['countX'], '=round((B5) / E2)')
+set(aliases['countX'], '=round((B5) / E2) + 2')
 set('D7', 'Count Y:')
-set(aliases['countY'], '=round((B4) / E3)')
+set(aliases['countY'], '=round((B4) / E3) + 2')
 set ('D8', 'Array2 XPos:')
 set (aliases['array2XPos'], '=sin(60deg)*(B2*2+B3-0.26794899999999999*B2)')
 set ('D9', 'Array2 YPos:')
 set (aliases['array2YPos'],'=E3/2')
 
-#plate = Part.makeBox(PLATE_WIDTH,PLATE_LENGTH,PLATE_HEIGHT)
-#plate = Part.makeBox(worksheet.B4, worksheet.B5, worksheet.B6)
-App.ActiveDocument.addObject("Part::Box", "Plate")
-plateObject = App.ActiveDocument.getObject("Plate")
-App.ActiveDocument.Plate.setExpression('Length', u'EditMe.length')
-App.ActiveDocument.Plate.setExpression('Width', u'EditMe.width')
-App.ActiveDocument.Plate.setExpression('Height', u'EditMe.height')
+
+
+
 
 #xInterval = float(worksheet.getContents(aliases['xInterval']))
 xInterval = 2*math.sin(math.pi/180.0*60)*(RADIUS*2+(SEPARATION-0.267949))
@@ -220,11 +207,11 @@ countX = int((PLATE_WIDTH) / xInterval)
 
 
 
-App.ActiveDocument.addObject("Part::RegularPolygon","Hexagon")
-App.ActiveDocument.Hexagon.Polygon=6
-App.ActiveDocument.Hexagon.setExpression('Circumradius','EditMe.radius')
-hexagonObject = App.ActiveDocument.getObject("Hexagon")
-Gui.ActiveDocument.getObject("Hexagon").Visibility=False
+App.ActiveDocument.addObject("Part::RegularPolygon","HoneycombHexagon")
+App.ActiveDocument.HoneycombHexagon.Polygon=6
+App.ActiveDocument.HoneycombHexagon.setExpression('Circumradius','EditMe.radius')
+hexagonObject = App.ActiveDocument.getObject("HoneycombHexagon")
+Gui.ActiveDocument.getObject("HoneycombHexagon").Visibility=False
 
 
 extrudedHexagonObject = App.ActiveDocument.addObject('Part::Extrusion', 'ExtrudedHexagon')
@@ -238,8 +225,8 @@ extrudedHexagonObject.setExpression('Placement.Base.z', 'EditMe.tweakZ')
 
 xvector = App.Vector(xInterval,0,0)
 yvector = App.Vector(0, yInterval,0)
-row1Array = Draft.makeArray(extrudedHexagonObject, xvector,yvector,countX,countY,"HoneyCombRow1Array")
-row2Array = Draft.makeArray(extrudedHexagonObject, xvector,yvector,countX,countY,"HoneyCombRow2Array")
+row1Array = Draft.makeArray(extrudedHexagonObject, xvector,yvector,countX,countY,name="HoneycombArray1")
+row2Array = Draft.makeArray(extrudedHexagonObject, xvector,yvector,countX,countY,name="HoneycombArray2")
 row2Array.Placement = App.Placement(App.Vector(math.sin(60*math.pi/180.0)*(RADIUS*2+(SEPARATION-0.267949)),yInterval,0),App.Rotation(0,0,0),App.Vector(0,0,0))
 #row2Array.setExpression('Placement.Base.x','sin(60deg) * (EditMe.radius * 2 + (EditMe.separation-0.267949*EditMe.radius))')
 row2Array.setExpression('Placement.Base.x','EditMe.array2XPos')
@@ -255,175 +242,67 @@ row2Array.setExpression('IntervalY.y','EditMe.yInterval')
 row2Array.setExpression('NumberX','EditMe.countX')
 row2Array.setExpression('NumberY','EditMe.countY')
 
-#part design stuff
+App.activeDocument().addObject("Part::MultiFuse","Fused_Arrays")
+App.activeDocument().Fused_Arrays.Shapes = [App.activeDocument().HoneycombArray1,App.activeDocument().HoneycombArray2,]
+Gui.activeDocument().HoneycombArray1.Visibility=False
+Gui.activeDocument().HoneycombArray2.Visibility=False
+
+
 window = QtGui.QApplication.activeWindow()
-items=('Add Part Design Compatibility (requires Lattice2 workbench)','Skip Part Design Compatibility')
-item,ok = QtGui.QInputDialog.getItem(window, "Part Design Compatibility", "Make this Part Design compatible?\nRequires DeepSOIC's Lattice2 workbench.\nTools -> Addon Manager -> lattice2 -> Install/Update.", items, 0, False)
+items=('Part Design Workbench Body','Part Workbench Object')
+item,ok = QtGui.QInputDialog.getItem(window, "Select object type", "Select your object type.  It can be a Part Design body or a Part Cut object.", items, 0, False)
 if ok:
-    if item == items[0]:
-        docName = App.activeDocument().Label
-        try:
-            import lattice2LinearArray
-            import lattice2Executer
-            import lattice2PDPattern
-        except:
-            msg = QtGui.QMessageBox()
-            msg.setWindowTitle('Message from Management')
-            msg.setText('You need to install Lattice2 workbench.  Exiting ungracefully...')
-            msg.exec_()
-            App.ActiveDocument.recompute()
-            raise StandardError('Lattice2 not found.')
+    if item == items[0]: #PD Body
 
-        App.activeDocument().addObject('PartDesign::Body','plate_body')
-        Gui.activeView().setActiveObject('pdbody',App.activeDocument().plate_body)
-        App.ActiveDocument.addObject('PartDesign::AdditiveBox','Box')
-        App.ActiveDocument.plate_body.addObject(App.activeDocument().Box)
-        App.ActiveDocument.Box.setExpression('Length', u'EditMe.length')
-        App.ActiveDocument.Box.setExpression('Width', u'EditMe.width')
-        App.ActiveDocument.Box.setExpression('Height', u'EditMe.height')
+        App.ActiveDocument.addObject("Part::Plane", "HoneycombPlane")
+        App.ActiveDocument.HoneycombPlane.setExpression('Length', u'EditMe.length')
+        App.ActiveDocument.HoneycombPlane.setExpression('Width', u'EditMe.width')
+        App.ActiveDocument.HoneycombPlane.setExpression('Placement.Base.x', u'EditMe.array2XPos + EditMe.radius * 2')
+        App.ActiveDocument.HoneycombPlane.setExpression('Placement.Base.y', u'EditMe.array2YPos + EditMe.radius * 2')
 
-        App.activeDocument().addObject('PartDesign::Body','pd_row1_array')
-        App.activeDocument().addObject('PartDesign::Body','pd_row2_array')
-
-        Gui.activeView().setActiveObject('pdbody',App.activeDocument().pd_row1_array)
-        App.activeDocument().pd_row1_array.newObject('Sketcher::SketchObject','hexagon_sketch')
-        App.activeDocument().hexagon_sketch.Support = (App.activeDocument().XY_Plane001, [''])
-        App.activeDocument().hexagon_sketch.MapMode = 'FlatFace'
-        makeHexagonSketch('hexagon_sketch')
-       
-        App.activeDocument().pd_row1_array.newObject("PartDesign::Pad","hex_pad")
-        App.activeDocument().hex_pad.Profile = App.activeDocument().hexagon_sketch
-        App.ActiveDocument.hex_pad.setExpression('Length', u'EditMe.height')
-
-        Gui.activeView().setActiveObject('pdbody',App.activeDocument().pd_row2_array)
-        App.activeDocument().pd_row2_array.newObject('Sketcher::SketchObject','hexagon_sketch2')
-        App.activeDocument().hexagon_sketch.Support = (App.activeDocument().XY_Plane001, [''])
-        App.activeDocument().hexagon_sketch.MapMode = 'FlatFace'
-        makeHexagonSketch('hexagon_sketch2')
-
-
-        App.activeDocument().pd_row2_array.newObject("PartDesign::Pad","hex_pad2")
-        App.activeDocument().hex_pad2.Profile = App.activeDocument().hexagon_sketch2
-        App.ActiveDocument.hex_pad2.setExpression('Length', u'EditMe.height')
+        App.activeDocument().addObject("Part::Cut","BaseFeatureFace")
+        App.ActiveDocument.getObject("BaseFeatureFace").ViewObject.Visibility=False
+        App.activeDocument().BaseFeatureFace.Base = App.activeDocument().HoneycombPlane
+        App.activeDocument().BaseFeatureFace.Tool = App.activeDocument().Fused_Arrays
+        Gui.activeDocument().HoneycombPlane.Visibility=False
+        Gui.activeDocument().Fused_Arrays.Visibility=False
         App.ActiveDocument.recompute()
+        App.activeDocument().addObject('PartDesign::Body','HoneycombBody')
+        App.activeDocument().HoneycombBody.BaseFeature = App.activeDocument().BaseFeatureFace
+        Gui.activeView().setActiveObject('pdHoneycombBody', App.activeDocument().HoneycombBody)
+        App.activeDocument().HoneycombBody.newObject("PartDesign::Pad","HoneycombPad")
+        App.activeDocument().HoneycombPad.Profile = (App.activeDocument().BaseFeature, ["Face1"])
+        App.activeDocument().HoneycombPad.Length = 10.0
+        App.ActiveDocument.recompute()
+        Gui.activeDocument().setEdit('HoneycombPad', 0)
+        Gui.activeDocument().hide("BaseFeature")
+        App.ActiveDocument.HoneycombPad.setExpression('Length', u'EditMe.height')
+        App.ActiveDocument.HoneycombPad.Length2 = 100.000000
+        App.ActiveDocument.HoneycombPad.Type = 0
+        App.ActiveDocument.HoneycombPad.UpToFace = None
+        App.ActiveDocument.HoneycombPad.Reversed = 0
+        App.ActiveDocument.HoneycombPad.Midplane = 0
+        App.ActiveDocument.HoneycombPad.Offset = 0.000000
+        App.ActiveDocument.recompute()
+        Gui.activeDocument().resetEdit()
+    else: #Part object
+        #plate = Part.makeBox(PLATE_WIDTH,PLATE_LENGTH,PLATE_HEIGHT)
+        #plate = Part.makeBox(worksheet.B4, worksheet.B5, worksheet.B6)
+        App.ActiveDocument.addObject("Part::Box", "Plate")
+        plateObject = App.ActiveDocument.getObject("Plate")
+        App.ActiveDocument.Plate.setExpression('Length', u'EditMe.length')
+        App.ActiveDocument.Plate.setExpression('Width', u'EditMe.width')
+        App.ActiveDocument.Plate.setExpression('Height', u'EditMe.height')
+        App.ActiveDocument.Plate.setExpression('Placement.Base.x', u'EditMe.array2XPos + EditMe.radius * 2')
+        App.ActiveDocument.Plate.setExpression('Placement.Base.y', u'EditMe.array2YPos + EditMe.radius * 2')
 
-        App.ActiveDocument.getObject("pd_row2_array").Placement = App.Placement(App.Vector(3.22,0,0),App.Rotation(App.Vector(0,0,1),0))
-        App.ActiveDocument.pd_row2_array.setExpression('Placement.Base.x', u'EditMe.array2XPos')
-        App.ActiveDocument.getObject("pd_row2_array").Placement = App.Placement(App.Vector(3.22,0,0),App.Rotation(App.Vector(0,0,1),0))
-        App.ActiveDocument.getObject("pd_row2_array").Placement = App.Placement(App.Vector(3.21651,1.86,0),App.Rotation(App.Vector(0,0,1),0))
-        App.ActiveDocument.pd_row2_array.setExpression('Placement.Base.y', u'EditMe.array2YPos')
+        App.activeDocument().addObject("Part::Cut","HoneycombGrid")
+        App.activeDocument().HoneycombGrid.Base = App.activeDocument().Plate
+        App.activeDocument().HoneycombGrid.Tool = App.activeDocument().Fused_Arrays
+        Gui.activeDocument().Plate.Visibility=False
+        Gui.activeDocument().Fused_Arrays.Visibility=False
 
-        Gui.ActiveDocument.getObject("hexagon_sketch2").Visibility=False
-        Gui.ActiveDocument.getObject("hexagon_sketch").Visibility=False
-        Gui.activeView().setActiveObject('pdbody',App.activeDocument().pd_row2_array)
-        f = lattice2LinearArray.makeLinearArray(name='LinearArray')
-        f.Link = App.ActiveDocument.Box
-        f.LinkSubelement = 'Edge9'
-        f.GeneratorMode = 'StepN'
-        lattice2Executer.executeFeature(f)
-        Gui.Selection.clearSelection()
-        Gui.Selection.addSelection(f)
-        App.ActiveDocument.LinearArray.setExpression('Count', u'EditMe.countX+1')
-        App.ActiveDocument.LinearArray.setExpression('Step', u'EditMe.xInterval')
-        App.activeDocument().recompute()
-        f = lattice2PDPattern.makeFeature()
-        f.FeaturesToCopy = [App.ActiveDocument.hex_pad2]
-        f.PlacementsTo = App.ActiveDocument.LinearArray
-        f.Referencing = 'First item'
-        lattice2Executer.executeFeature(f)
-        f.PlacementsTo.ViewObject.hide()
-        f.BaseFeature.ViewObject.hide()
-        Gui.Selection.addSelection(f)
-
-        Gui.ActiveDocument.ActiveView.setActiveObject('pdbody', App.ActiveDocument.getObject('pd_row1_array'))
-        Gui.activateWorkbench("Lattice2Workbench")
-        import PartDesignGui
-        f = lattice2LinearArray.makeLinearArray(name='LinearArray')
-        f.Link = App.ActiveDocument.Box
-        f.LinkSubelement = 'Edge9'
-        f.GeneratorMode = 'StepN'
-        lattice2Executer.executeFeature(f)
-        Gui.Selection.clearSelection()
-        Gui.Selection.addSelection(f)
-        App.ActiveDocument.LinearArray001.setExpression('Step', u'EditMe.xInterval')
-        App.ActiveDocument.LinearArray001.setExpression('Count', u'EditMe.countX+1')
-        App.activeDocument().recompute()
-        f = lattice2PDPattern.makeFeature()
-        f.FeaturesToCopy = [App.ActiveDocument.hex_pad]
-        f.PlacementsTo = App.ActiveDocument.LinearArray001
-        f.Referencing = 'First item'
-        lattice2Executer.executeFeature(f)
-        f.PlacementsTo.ViewObject.hide()
-        f.BaseFeature.ViewObject.hide()
-        Gui.Selection.addSelection(f)
-        f = None
-
-        f = lattice2LinearArray.makeLinearArray(name='LinearArray')
-        f.Link = App.ActiveDocument.Box
-        f.LinkSubelement = 'Edge2'
-        f.GeneratorMode = 'StepN'
-        lattice2Executer.executeFeature(f)
-        Gui.Selection.clearSelection()
-        Gui.Selection.addSelection(f)
-        App.ActiveDocument.LinearArray002.setExpression('Count', u'EditMe.countY+1')
-        App.ActiveDocument.LinearArray002.setExpression('Step', u'EditMe.yInterval')
-        App.activeDocument().recompute()
-        f = lattice2PDPattern.makeFeature()
-        f.FeaturesToCopy = [App.ActiveDocument.LatticePattern001]
-        f.PlacementsTo = App.ActiveDocument.LinearArray002
-        f.Referencing = 'First item'
-        lattice2Executer.executeFeature(f)
-        f.PlacementsTo.ViewObject.hide()
-        f.BaseFeature.ViewObject.hide()
-        Gui.Selection.addSelection(f)
-        f = None
-        Gui.activateWorkbench('PartDesignWorkbench')
-        Gui.ActiveDocument.ActiveView.setActiveObject('pdbody', App.ActiveDocument.getObject('pd_row2_array'))
-        Gui.activateWorkbench("Lattice2Workbench")
-        import PartDesignGui
-        f = lattice2LinearArray.makeLinearArray(name='LinearArray')
-        f.Link = App.ActiveDocument.Box
-        f.LinkSubelement = 'Edge2'
-        f.GeneratorMode = 'StepN'
-        lattice2Executer.executeFeature(f)
-        Gui.Selection.clearSelection()
-        Gui.Selection.addSelection(f)
-        App.ActiveDocument.LinearArray003.setExpression('Step', u'EditMe.yInterval')
-        App.ActiveDocument.LinearArray003.setExpression('Count', u'EditMe.countY+1')
-        App.activeDocument().recompute()
-        f = lattice2PDPattern.makeFeature()
-        f.FeaturesToCopy = [App.ActiveDocument.LatticePattern]
-        f.PlacementsTo = App.ActiveDocument.LinearArray003
-        f.Referencing = 'First item'
-        lattice2Executer.executeFeature(f)
-        f.PlacementsTo.ViewObject.hide()
-        f.BaseFeature.ViewObject.hide()
-        Gui.Selection.addSelection(f)
-
-
-        App.ActiveDocument.plate_body.setExpression('Placement.Base.x', u'EditMe.tweakX')
-        App.ActiveDocument.plate_body.setExpression('Placement.Base.y', u'EditMe.tweakY')
-        App.ActiveDocument.plate_body.setExpression('Placement.Base.z', u'EditMe.tweakZ')
-        App.ActiveDocument.pd_row1_array.setExpression('Placement.Base.x', u'EditMe.tweakX')
-        App.ActiveDocument.pd_row1_array.setExpression('Placement.Base.y', u'EditMe.tweakY')
-        App.ActiveDocument.pd_row1_array.setExpression('Placement.Base.z', u'EditMe.tweakZ')
-        App.ActiveDocument.pd_row2_array.setExpression('Placement.Base.x', u'EditMe.array2XPos + EditMe.tweakX')
-        App.ActiveDocument.pd_row2_array.setExpression('Placement.Base.y', u'EditMe.array2YPos + EditMe.tweakY')
-        App.ActiveDocument.pd_row2_array.setExpression('Placement.Base.z', u'EditMe.tweakZ')
-
-        #uncomment these if you just want to make the part/draft objects invisible
-        #App.ActiveDocument.getObject('Plate').Visibility=False
-        #App.ActiveDocument.getObject("HoneyCombRow2Array").Visibility=False
-        #App.ActiveDocument.getObject("HoneyCombRow1Array").Visibility=False
-
-        #and comment these to keep them from getting removed
-        App.ActiveDocument.removeObject('Plate')
-        App.ActiveDocument.removeObject("HoneyCombRow2Array")
-        App.ActiveDocument.removeObject("HoneyCombRow1Array")
-        App.ActiveDocument.removeObject("ExtrudedHexagon")
-        App.ActiveDocument.removeObject("Hexagon")
 
 
 App.ActiveDocument.recompute()
-
-
+Gui.SendMsgToActiveView("ViewFit")
