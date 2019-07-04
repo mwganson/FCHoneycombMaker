@@ -132,11 +132,6 @@ the formulas in those cells with immediate values, and thus they won't be recalu
 If you would prefer a round plate, simply delete the plate object and replace it with a cylinder, and then use the Tweak values 
 and countX and countY variables to arrange the hexagon arrays to your liking.
 
-The final step in the process is to fuse the arrays together, and then cut them out of the plate.
-
-If you want to create a border (or have margins) you can resize the plate independently of the honeycomb by adjusting its properties 
-in the data tab in the combo view.  To do this you'll need to click the round expression engine icon, and then choose discard, just 
-bear in mind this will break the links to the spreadsheet.
 """
 set('A13', msg1)
 

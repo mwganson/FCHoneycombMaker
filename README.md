@@ -48,7 +48,6 @@ the formulas in those cells with immediate values, and thus they won't be recalu
 If you would prefer a round plate, simply delete the plate object and replace it with a cylinder, and then use the Tweak values 
 and countX and countY variables to arrange the hexagon arrays to your liking.
 
-The final step in the process is to fuse the arrays together, and then cut them out of the plate.
 
 
 If you'd prefer a different shape as the base you could easily swap out the extruded hexagon with a sphere or, as I did in the image below, an ellipsoid shaped somewhat like an egg.  Could be used to create egg crate designs.
