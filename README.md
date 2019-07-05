@@ -48,9 +48,7 @@ the formulas in those cells with immediate values, and thus they won't be recalu
 If you would prefer a round plate, simply delete the plate object and replace it with a cylinder, and then use the Tweak values 
 and countX and countY variables to arrange the hexagon arrays to your liking.
 
-
-
-If you'd prefer a different shape as the base you could easily swap out the extruded hexagon with a sphere or, as I did in the image below, an ellipsoid shaped somewhat like an egg.  Could be used to create egg crate designs.
+If you'd prefer a different shape as the base you should select Part Workbench object.  Then you could easily swap out the extruded hexagon with a sphere or, as I did in the image below, an ellipsoid shaped somewhat like an egg.  Could be used to create egg crate designs.
 
 <img src="honeycombmaker-screenshot8.png" alt="screenshot8">
 
@@ -66,3 +64,20 @@ For more z direction modifications, look at how I set the placement offset for a
 
 
 <img src="honeycombmaker-screenshot10.png" alt="screenshot10">
+<br/>
+<br/>
+If you would like a border around the grid this is probably easier to do with the Part Design workbench option, but it can of course be done either way.  If you chose Part Design, just add a new sketch mapped to the xy_plane and sketch out the border you desire, then pad it.<br/>
+<br/>
+Here I sketched out an oval border:<br/>
+<br/>
+<img src="honeycombmaker-screenshot3.png" alt="oval sketch"><br/>
+<br/>
+then padded it to the length of the first pad: <br/>
+<br/>
+<img src="honeycombmaker-screenshot4.png" alt="oval border padded"><br/>
+<br/>
+The next would be to do a pocket operation to trim the excess, but this is not intended to be a tutorial on using FreeCAD, so I won't show that.<br/>
+<br/>
+If you would like a dome-shaped honeycomb, watch this animated gif video below: <br/>
+<br/>
+<img src="honeycombmaker-dome-shaped.gif" alt="dome-shaped grid"><br/>
